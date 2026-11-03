@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sunday Sieve — egg tart pre-orders
 
-## Getting Started
+Pre-order site for Sunday Sieve's weekend egg tart batches: pickup only, guest checkout,
+payment by QR transfer with manual verification. Built from the technical design document
+(`egg-tart-preorder-tdd(final final).md`) and styled with the Sunday Sieve design system.
 
-First, run the development server:
+## Stack
+
+Next.js (App Router) + TypeScript, Drizzle, Postgres (Supabase in production), Supabase Storage,
+Resend for email.
+
+## Local setup
+
+No Docker needed. Without `DATABASE_URL`, the app uses PGlite (Postgres in WASM) in `.pglite/`,
+so the order-status trigger, row locks and RLS behave as they will in production.
 
 ```bash
+npm install
+npm run db:seed   # applies db/migrations and seeds products, payment channels, pickup point
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+PGlite is single-process: stop `npm run dev` before running `db:*` scripts.
+Without `RESEND_API_KEY`, emails are printed to the terminal and saved in `.dev-mail/`.
+Without Supabase keys, uploaded files go to `.storage/`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Supabase transaction-pooler URL (Singapore). Unset = local PGlite |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Private storage. Server-only: never prefix with `NEXT_PUBLIC_` |
+| `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO` | Transactional email |
+| `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_FACEBOOK_URL`, `NEXT_PUBLIC_MESSENGER_URL`, `NEXT_PUBLIC_CONTACT_NUMBER` | Public site facts |
 
-## Learn More
+## Layout
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `db/migrations/` — hand-written SQL, the source of truth: schema, the order-transition trigger (TDD §6.3), RLS
+- `db/seed.sql` — launch menu, payment channels, pickup point
+- `src/lib/db/` — Drizzle schema and client
+- `src/lib/domain.ts` — deadlines, capacity, order numbers, tokens
+- `src/lib/notifications/` — email outbox, templates, transport
+- `src/styles/` — design system tokens and component styles

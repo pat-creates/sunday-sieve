@@ -1,0 +1,134 @@
+/* Sunday Sieve design system tokens (copied from the design system; web fonts only) */
+:root, [data-theme="light"] {
+  --sun-yellow: #f4ca44;
+  --cream: #fff9e5;
+  --cream-light: #fffcf2;
+  --leaf-green: #2a6421;
+  --charcoal: #363533;
+  --surface: var(--cream-light);
+  --surface-inverse: var(--leaf-green);
+  --ink: var(--charcoal);
+  --ink-brand: var(--leaf-green);
+  --ink-inverse: var(--cream);
+  --accent: var(--sun-yellow);
+  --surface-raised: #ffffff;
+  --surface-sunken: #f5ebcc;
+  --line: #e8dcb8;
+  --line-strong: #8c8577;
+  --ink-muted: #6b665c;
+  --sun-yellow-soft: #fdefc0;
+  --leaf-green-soft: #e4efdc;
+  --danger: #a8321e;
+  --danger-soft: #fbe4dc;
+  --on-accent: var(--charcoal);
+  --focus: var(--leaf-green);
+  --elevation-0: none;
+  --elevation-1: 0 1px 2px rgba(54, 53, 51, 0.08), 0 1px 1px rgba(54, 53, 51, 0.04);
+  --elevation-2: 0 3px 8px rgba(54, 53, 51, 0.1), 0 1px 2px rgba(54, 53, 51, 0.06);
+  --elevation-3: 0 8px 20px rgba(54, 53, 51, 0.12), 0 2px 6px rgba(54, 53, 51, 0.06);
+  --elevation-4: 0 16px 40px rgba(54, 53, 51, 0.16), 0 4px 12px rgba(54, 53, 51, 0.08);
+}
+:root {
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 40px;
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --font-display: Fraunces, Georgia, serif;
+  --font-subhead: Fraunces, Georgia, serif;
+  --font-body: "Open Sans", system-ui, sans-serif;
+  --font-accent: "Short Stack", cursive;
+  --text-display: 700 56px/60px var(--font-display);
+  --text-heading-1: 700 40px/44px var(--font-display);
+  --text-heading-2: 600 28px/34px var(--font-subhead);
+  --text-heading-3: 600 20px/26px var(--font-subhead);
+  --text-body: 400 16px/24px var(--font-body);
+  --text-small: 400 14px/20px var(--font-body);
+  --text-accent: 400 24px/32px var(--font-accent);
+}
+.display {
+  font-family: var(--font-display);
+  font-size: 56px;
+  line-height: 60px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.heading-1 {
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 44px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.heading-2 {
+  font-family: var(--font-subhead);
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.heading-3 {
+  font-family: var(--font-subhead);
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.small {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.accent {
+  font-family: var(--font-accent);
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/Fraunces-Variable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/Fraunces-Italic-Variable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Open Sans";
+  src: url("/fonts/OpenSans-Variable.ttf") format("truetype");
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Open Sans";
+  src: url("/fonts/OpenSans-Italic-Variable.ttf") format("truetype");
+  font-weight: 300 800;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Short Stack";
+  src: url("/fonts/ShortStack-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
