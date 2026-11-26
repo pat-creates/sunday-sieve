@@ -4,13 +4,13 @@ import { CapacityIndicator } from './CapacityIndicator';
 import { cx, headingTag, type HeadingLevel } from './util';
 
 export interface BakeDayPanelProps {
-  /** open: taking orders; closed: past cut-off; soldout: no capacity; none: no batch scheduled. */
+  /** open: taking orders (urgent when remaining <= almostSoldOutAt); closed: past cut-off, quiet look, no count; soldout: no capacity, quiet look; none: no batch scheduled, quiet look. */
   state?: 'open' | 'closed' | 'soldout' | 'none';
-  /** "Saturday, 15 August" */
+  /** "Saturday, 29 November" */
   bakeDate?: string;
   /** "3:00–7:00 PM" */
   pickupWindow?: string;
-  /** "Friday, 14 August at 6:00 PM" */
+  /** "Friday, 28 November at 6:00 PM" */
   cutoff?: string;
   remaining?: number;
   capacity?: number;
@@ -30,56 +30,64 @@ export interface BakeDayPanelProps {
   className?: string;
 }
 
-/** The landing page's next-batch panel (TDD §9.1 item 2), in the loud yellow-on-green look. */
+/**
+ * The landing page's next-batch panel (TDD §9.1 item 2). Loud yellow-on-green while taking
+ * orders, urgent when almost sold out, and a quiet look once sold out, closed or unscheduled.
+ */
 export function BakeDayPanel(props: BakeDayPanelProps) {
   const reasonId = useId();
   const headId = useId();
   const state = props.state || 'open';
   const H = headingTag(props.headingLevel, 2);
+  const follow = props.followHref ? (
+    <Button variant="primary" size="lg" block href={props.followHref}>{props.followLabel || 'Follow us on Facebook'}</Button>
+  ) : null;
 
   if (state === 'none') {
     return (
-      <section className={cx('ss-bakeday', 'ss-bakeday--none', props.className)} aria-labelledby={headId}>
+      <section className={cx('ss-bakeday', 'ss-bakeday--quiet', 'ss-bakeday--none', props.className)} aria-labelledby={headId}>
         <p className="ss-bakeday__eyebrow">Next batch</p>
         <H id={headId} className="ss-bakeday__date">No batch scheduled yet</H>
         <p className="ss-bakeday__line">{props.noneText || 'New bake days are announced on our Facebook page.'}</p>
-        {props.followHref ? (
-          <Button variant="sun" href={props.followHref} size="lg">{props.followLabel || 'Get notified'}</Button>
-        ) : null}
+        {follow ? <div className="ss-bakeday__cta">{follow}</div> : null}
       </section>
     );
   }
 
+  const almostAt = props.almostSoldOutAt ?? 24;
   const remaining = props.remaining ?? 0;
   const full = state === 'soldout' || remaining <= 0;
-  const closed = state === 'closed';
+  const closed = !full && state === 'closed';
+  const quiet = full || closed;
+  const almost = !quiet && remaining <= almostAt;
   const reason = full ? 'This batch is sold out.' : closed ? 'Orders for this batch have closed.' : null;
-  const label = props.ctaLabel || (full ? 'Sold out' : closed ? 'Orders closed' : 'Order now');
+  const label = props.ctaLabel || (almost ? `Order now · ${remaining} left` : 'Order now');
 
   return (
-    <section className={cx('ss-bakeday', props.className)} aria-labelledby={headId}>
-      <p className="ss-bakeday__eyebrow">{props.eyebrow || 'Next batch'}</p>
+    <section className={cx('ss-bakeday', quiet && 'ss-bakeday--quiet', almost && 'ss-bakeday--almost', props.className)} aria-labelledby={headId}>
+      <div className="ss-bakeday__head">
+        <p className="ss-bakeday__eyebrow">{props.eyebrow || 'Next batch'}</p>
+        {quiet ? <span className="ss-bakeday__status">{full ? 'Sold out' : 'Orders closed'}</span> : null}
+      </div>
       <H id={headId} className="ss-bakeday__date">{props.bakeDate}</H>
       <dl className="ss-bakeday__facts">
         <div><dt>Pickup</dt><dd>{props.pickupWindow}</dd></div>
-        <div><dt>Orders close</dt><dd>{props.cutoff}</dd></div>
+        <div><dt>{closed ? 'Orders closed' : 'Orders close'}</dt><dd>{props.cutoff}</dd></div>
       </dl>
-      {props.note ? <p className="ss-bakeday__note">{props.note}</p> : null}
-      <CapacityIndicator remaining={full ? 0 : remaining} capacity={props.capacity} almostSoldOutAt={props.almostSoldOutAt} inverse />
-      <div className="ss-bakeday__cta">
-        <Button variant="sun" size="lg" block href={props.orderHref} disabled={full || closed}
-          aria-describedby={reason ? reasonId : undefined}>
-          {label}
-        </Button>
-        {reason ? (
-          <p id={reasonId} className="ss-bakeday__reason">
-            {reason}{props.reasonExtra ? ` ${props.reasonExtra}` : ''}
-          </p>
-        ) : null}
-        {reason && props.followHref ? (
-          <Button variant="sun" block href={props.followHref}>{props.followLabel || 'Follow us on Facebook'}</Button>
-        ) : null}
-      </div>
+      {props.note && !quiet ? <p className="ss-bakeday__note">{props.note}</p> : null}
+      {closed ? null : (
+        <CapacityIndicator remaining={full ? 0 : remaining} capacity={props.capacity} almostSoldOutAt={almostAt} inverse={!quiet} />
+      )}
+      {quiet ? (
+        <div className="ss-bakeday__cta">
+          <p id={reasonId} className="ss-bakeday__reason">{reason}{props.reasonExtra ? ` ${props.reasonExtra}` : ''}</p>
+          {follow}
+        </div>
+      ) : (
+        <div className="ss-bakeday__cta">
+          <Button variant="sun" size="lg" block href={props.orderHref}>{label}</Button>
+        </div>
+      )}
     </section>
   );
 }

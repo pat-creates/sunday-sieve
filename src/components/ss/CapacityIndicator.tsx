@@ -5,7 +5,7 @@ export interface CapacityIndicatorProps {
   remaining: number;
   /** Bake day capacity in tarts. Default 96. */
   capacity?: number;
-  /** At or below this many tarts, show "Almost sold out". Default 24. */
+  /** At or below this many tarts, show the urgent "Almost sold out" flag and "Only N tarts left". Default 24. */
   almostSoldOutAt?: number;
   /** Colours for use on surface-inverse (leaf-green). */
   inverse?: boolean;
@@ -18,12 +18,18 @@ export function CapacityIndicator({ remaining: rawRemaining, capacity = 96, almo
   const state = remaining <= 0 ? 'soldout' : remaining <= almostSoldOutAt ? 'almost' : 'open';
   const reserved = capacity - remaining;
   const taken = Math.min(100, Math.round((reserved / capacity) * 100));
-  const label = state === 'soldout' ? 'Sold out' : state === 'almost' ? 'Almost sold out' : `${remaining} tarts left`;
+  const label = state === 'soldout'
+    ? 'Sold out'
+    : state === 'almost'
+      ? `Only ${remaining}${remaining === 1 ? ' tart left' : ' tarts left'}`
+      : `${remaining} tarts left`;
   return (
     <div className={cx('ss-cap', `ss-cap--${state}`, inverse && 'ss-cap--inverse', className)}>
+      {state === 'almost' ? (
+        <span className="ss-cap__flag"><span className="ss-cap__dot" aria-hidden="true" />Almost sold out</span>
+      ) : null}
       <div className="ss-cap__text">
         <strong className="ss-cap__label">{label}</strong>
-        {state === 'almost' ? <span className="ss-cap__sub">{remaining} tarts left</span> : null}
       </div>
       <div
         className="ss-cap__track"

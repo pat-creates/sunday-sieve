@@ -60,6 +60,13 @@
       props.action ? h('div', { className: 'ss-notice__action' }, props.action) : null);
   }
 
+  /* ---------- Icons (inline, 20px, currentColor) ---------- */
+  function icon(paths) {
+    return h('svg', { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true', focusable: 'false' }, paths);
+  }
+  var ICON_COPY = icon([h('rect', { key: 'a', x: 9, y: 9, width: 12, height: 12, rx: 2 }), h('path', { key: 'b', d: 'M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1' })]);
+  var ICON_CHECK = icon(h('path', { d: 'M5 12.5l4.5 4.5L19 7.5' }));
+
   /* ---------- OrderNumber ---------- */
   function OrderNumber(props) {
     var st = useState(false), copied = st[0], setCopied = st[1];
@@ -72,7 +79,10 @@
       h('span', { className: 'ss-ordernum__label' }, props.label || 'Order number'),
       h('span', { className: 'ss-ordernum__row' },
         h('span', { className: 'ss-ordernum__value' }, props.value),
-        props.copyable === false ? null : h('button', { type: 'button', className: 'ss-ordernum__copy', onClick: copy, 'aria-live': 'polite' }, copied ? 'Copied' : 'Copy')));
+        props.copyable === false ? null : h('button', { type: 'button', className: cx('ss-ordernum__copy', copied && 'ss-ordernum__copy--done'), onClick: copy,
+          'aria-label': copied ? 'Order number copied' : 'Copy order number', title: copied ? 'Copied' : 'Copy order number' },
+          copied ? ICON_CHECK : ICON_COPY)),
+      h('span', { className: 'ss-visually-hidden', 'aria-live': 'polite' }, copied ? 'Order number copied' : ''));
   }
 
   /* ---------- CapacityIndicator (TDD §9.1) ---------- */
@@ -86,12 +96,11 @@
     var almostAt = props.almostSoldOutAt == null ? 24 : props.almostSoldOutAt;
     var state = capacityState(remaining, almostAt);
     var taken = Math.min(100, Math.round(((capacity - remaining) / capacity) * 100));
-    var label = state === 'soldout' ? 'Sold out' : state === 'almost' ? 'Almost sold out' : remaining + ' tarts left';
-    var sub = state === 'almost' ? remaining + ' tarts left' : null;
+    var label = state === 'soldout' ? 'Sold out' : state === 'almost' ? 'Only ' + remaining + (remaining === 1 ? ' tart left' : ' tarts left') : remaining + ' tarts left';
     return h('div', { className: cx('ss-cap', 'ss-cap--' + state, props.inverse && 'ss-cap--inverse', props.className) },
+      state === 'almost' ? h('span', { className: 'ss-cap__flag' }, h('span', { className: 'ss-cap__dot', 'aria-hidden': 'true' }), 'Almost sold out') : null,
       h('div', { className: 'ss-cap__text' },
-        h('strong', { className: 'ss-cap__label' }, label),
-        sub ? h('span', { className: 'ss-cap__sub' }, sub) : null),
+        h('strong', { className: 'ss-cap__label' }, label)),
       h('div', { className: 'ss-cap__track', role: 'meter', 'aria-valuemin': 0, 'aria-valuemax': capacity, 'aria-valuenow': capacity - remaining, 'aria-valuetext': (capacity - remaining) + ' of ' + capacity + ' tarts reserved, ' + remaining + ' left', 'aria-label': 'Tarts reserved' },
         h('span', { className: 'ss-cap__fill', style: { width: taken + '%' } })));
   }
@@ -101,31 +110,38 @@
     var reasonId = useId(), headId = useId();
     var state = props.state || 'open';
     var HT = hTag(props.headingLevel, 2);
+    var follow = props.followHref ? h(Button, { variant: 'primary', size: 'lg', block: true, href: props.followHref }, props.followLabel || 'Follow us on Facebook') : null;
     if (state === 'none') {
-      return h('section', { className: cx('ss-bakeday', 'ss-bakeday--none', props.className), 'aria-labelledby': headId },
+      return h('section', { className: cx('ss-bakeday', 'ss-bakeday--quiet', 'ss-bakeday--none', props.className), 'aria-labelledby': headId },
         h('p', { className: 'ss-bakeday__eyebrow' }, 'Next batch'),
         h(HT, { id: headId, className: 'ss-bakeday__date' }, 'No batch scheduled yet'),
         h('p', { className: 'ss-bakeday__line' }, props.noneText || 'New bake days are announced on our Facebook page.'),
-        props.followHref ? h(Button, { variant: 'sun', href: props.followHref, size: 'lg' }, props.followLabel || 'Get notified') : null);
+        follow ? h('div', { className: 'ss-bakeday__cta' }, follow) : null);
     }
     var remaining = props.remaining;
+    var almostAt = props.almostSoldOutAt == null ? 24 : props.almostSoldOutAt;
     var full = state === 'soldout' || remaining <= 0;
-    var closed = state === 'closed';
-    var disabled = full || closed;
+    var closed = !full && state === 'closed';
+    var quiet = full || closed;
+    var almost = !quiet && remaining <= almostAt;
     var reason = full ? 'This batch is sold out.' : closed ? 'Orders for this batch have closed.' : null;
-    var label = props.ctaLabel || (full ? 'Sold out' : closed ? 'Orders closed' : 'Order now');
-    return h('section', { className: cx('ss-bakeday', props.className), 'aria-labelledby': headId },
-      h('p', { className: 'ss-bakeday__eyebrow' }, props.eyebrow || 'Next batch'),
+    var label = props.ctaLabel || (almost ? 'Order now \u00b7 ' + remaining + ' left' : 'Order now');
+    return h('section', { className: cx('ss-bakeday', quiet && 'ss-bakeday--quiet', almost && 'ss-bakeday--almost', props.className), 'aria-labelledby': headId },
+      h('div', { className: 'ss-bakeday__head' },
+        h('p', { className: 'ss-bakeday__eyebrow' }, props.eyebrow || 'Next batch'),
+        quiet ? h('span', { className: 'ss-bakeday__status' }, full ? 'Sold out' : 'Orders closed') : null),
       h(HT, { id: headId, className: 'ss-bakeday__date' }, props.bakeDate),
       h('dl', { className: 'ss-bakeday__facts' },
         h('div', null, h('dt', null, 'Pickup'), h('dd', null, props.pickupWindow)),
-        h('div', null, h('dt', null, 'Orders close'), h('dd', null, props.cutoff))),
-      props.note ? h('p', { className: 'ss-bakeday__note' }, props.note) : null,
-      h(CapacityIndicator, { remaining: full ? 0 : remaining, capacity: props.capacity, almostSoldOutAt: props.almostSoldOutAt, inverse: true }),
-      h('div', { className: 'ss-bakeday__cta' },
-        h(Button, { variant: 'sun', size: 'lg', block: true, href: props.orderHref, onClick: props.onOrder, disabled: disabled, 'aria-describedby': reason ? reasonId : undefined }, label),
-        reason ? h('p', { id: reasonId, className: 'ss-bakeday__reason' }, reason, props.reasonExtra ? ' ' + props.reasonExtra : '') : null,
-        reason && props.followHref ? h(Button, { variant: 'sun', block: true, href: props.followHref }, props.followLabel || 'Follow us on Facebook') : null));
+        h('div', null, h('dt', null, closed ? 'Orders closed' : 'Orders close'), h('dd', null, props.cutoff))),
+      props.note && !quiet ? h('p', { className: 'ss-bakeday__note' }, props.note) : null,
+      closed ? null : h(CapacityIndicator, { remaining: full ? 0 : remaining, capacity: props.capacity, almostSoldOutAt: almostAt, inverse: !quiet }),
+      quiet
+        ? h('div', { className: 'ss-bakeday__cta' },
+            h('p', { id: reasonId, className: 'ss-bakeday__reason' }, reason, props.reasonExtra ? ' ' + props.reasonExtra : ''),
+            follow)
+        : h('div', { className: 'ss-bakeday__cta' },
+            h(Button, { variant: 'sun', size: 'lg', block: true, href: props.orderHref, onClick: props.onOrder }, label)));
   }
 
   /* ---------- HowItWorks (TDD §9.1 item 4) ---------- */

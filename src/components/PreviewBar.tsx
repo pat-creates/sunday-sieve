@@ -8,7 +8,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 const LANDING = [['open', 'open'], ['almost', 'almost sold out'], ['soldout', 'sold out'], ['closed', 'closed'], ['none', 'no batch']] as const;
 const ORDER = [
   ['awaiting', 'awaiting payment'], ['short', 'short payment'], ['rejected', 'receipt rejected'], ['verifying', 'verifying'],
-  ['confirmed', 'confirmed'], ['baking', 'in the oven'], ['ready', 'ready'], ['completed', 'picked up'], ['cancelled', 'cancelled'],
+  ['confirmed', 'confirmed'], ['baking', 'in the oven'], ['ready', 'ready'], ['completed', 'picked up'], ['cancelled', 'cancelled (unpaid)'], ['cancelled_by_us', 'cancelled by us'],
 ] as const;
 
 export function PreviewBar({ sampleOrderNumber }: { sampleOrderNumber: string }) {

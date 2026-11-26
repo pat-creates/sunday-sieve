@@ -11,7 +11,7 @@ export const LANDING_SCENARIOS = ['open', 'almost', 'soldout', 'closed', 'none']
 export type LandingScenario = (typeof LANDING_SCENARIOS)[number];
 
 export const ORDER_SCENARIOS = [
-  'awaiting', 'short', 'rejected', 'verifying', 'confirmed', 'baking', 'ready', 'completed', 'cancelled',
+  'awaiting', 'short', 'rejected', 'verifying', 'confirmed', 'baking', 'ready', 'completed', 'cancelled', 'cancelled_by_us',
 ] as const;
 export type OrderScenario = (typeof ORDER_SCENARIOS)[number];
 
@@ -85,7 +85,7 @@ export function sampleOrder(scenario: OrderScenario, now = new Date()): OrderPag
   const status = ({
     awaiting: 'AWAITING_PAYMENT', short: 'AWAITING_PAYMENT', rejected: 'AWAITING_PAYMENT',
     verifying: 'PAYMENT_UNDER_REVIEW', confirmed: 'CONFIRMED', baking: 'BAKING',
-    ready: 'READY_FOR_PICKUP', completed: 'COMPLETED', cancelled: 'CANCELLED',
+    ready: 'READY_FOR_PICKUP', completed: 'COMPLETED', cancelled: 'CANCELLED', cancelled_by_us: 'CANCELLED',
   } as const)[scenario];
   const total = 63000;
   const placedAt = new Date(now.getTime() - 50 * 60_000);
@@ -124,7 +124,8 @@ export function sampleOrder(scenario: OrderScenario, now = new Date()): OrderPag
       : scenario === 'rejected'
         ? 'We couldn’t find reference number 7012 345 678901 in our GCash history. Please check the number on your receipt and upload it again.'
         : undefined,
-    cancellation: scenario === 'cancelled' ? { reason: 'unpaid_timeout' } : undefined,
+    cancellation: scenario === 'cancelled' ? { reason: 'unpaid_timeout' }
+      : scenario === 'cancelled_by_us' ? { reason: 'owner_cancelled' } : undefined,
     verificationSlaText: settings.verificationSlaText,
   };
 }

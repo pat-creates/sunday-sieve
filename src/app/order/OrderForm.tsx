@@ -67,39 +67,43 @@ export function OrderForm({ products, remainingTarts, maxTartsPerOrder, autoCanc
   }
 
   return (
-    <form onSubmit={submit} noValidate style={{ display: 'contents' }}>
-      <section className="page-section page-section--tight" aria-labelledby="step-boxes">
-        <h2 id="step-boxes" className="h-step">1. Choose your boxes</h2>
-        {products.map((p) => {
-          const others = totalTarts - (qty[p.id] ?? 0) * p.tartCount;
-          return (
-            <BoxSizeCard key={p.id} layout="row" name={p.name} subtitle={p.subtitle} tartCount={p.tartCount}
-              price={formatPeso(p.priceCentavos)} quantity={qty[p.id] ?? 0}
-              max={Math.max(0, Math.floor((cap - others) / p.tartCount))}
-              onQuantityChange={(v) => setQty((q) => ({ ...q, [p.id]: v }))} headingLevel={3} />
-          );
-        })}
-        <p className="fine">
-          Up to {maxTartsPerOrder} tarts per order. Need more? <a href={messengerUrl}>Message us</a>.
-        </p>
-      </section>
+    <form onSubmit={submit} noValidate className="cols">
+      <div className="col col--loose">
+        <section className="sec sec--tight" aria-labelledby="step-boxes">
+          <h2 id="step-boxes" className="h3 h3--step">1. Choose your boxes</h2>
+          {products.map((p) => {
+            const others = totalTarts - (qty[p.id] ?? 0) * p.tartCount;
+            return (
+              <BoxSizeCard key={p.id} layout="row" name={p.name} subtitle={p.subtitle} tartCount={p.tartCount}
+                price={formatPeso(p.priceCentavos)} quantity={qty[p.id] ?? 0}
+                max={Math.max(0, Math.floor((cap - others) / p.tartCount))}
+                onQuantityChange={(v) => setQty((q) => ({ ...q, [p.id]: v }))} headingLevel={3} />
+            );
+          })}
+          <p className="muted">
+            Up to {maxTartsPerOrder} tarts per order. Need more? <a href={messengerUrl}>Message us</a>.
+          </p>
+        </section>
 
-      <section className="page-section" aria-labelledby="step-details">
-        <h2 id="step-details" className="h-step">2. Your details</h2>
-        <TextField label="Name" name="name" autoComplete="name" value={details.name} onChange={set('name')} onBlur={blur('name')}
-          error={shown('name')} id="order-name" />
-        <TextField label="Email" name="email" type="email" autoComplete="email" inputMode="email" value={details.email}
-          onChange={set('email')} onBlur={blur('email')} error={shown('email')}
-          hint="Your order link and receipt go here. There's no account, so use an email you check." id="order-email" />
-        <TextField label="Mobile number" name="phone" type="tel" autoComplete="tel" inputMode="tel" value={details.phone}
-          onChange={set('phone')} onBlur={blur('phone')} error={shown('phone')}
-          hint="We only call or text if something goes wrong. Format: 0917 123 4567" id="order-phone" />
-        <TextField label="Note for us" name="note" optional multiline value={details.note} onChange={set('note')} onBlur={blur('note')}
-          error={shown('note')} hint="Picking up for someone else? Tell us their name." maxLength={500} id="order-note" />
-      </section>
+        <section className="sec" aria-labelledby="step-details">
+          <h2 id="step-details" className="h3 h3--step">2. Your details</h2>
+          <div className="fields">
+            <TextField label="Name" name="name" autoComplete="name" value={details.name} onChange={set('name')} onBlur={blur('name')}
+              error={shown('name')} id="order-name" />
+            <TextField label="Mobile number" name="phone" type="tel" autoComplete="tel" inputMode="tel" value={details.phone}
+              onChange={set('phone')} onBlur={blur('phone')} error={shown('phone')}
+              hint="Only if something goes wrong. Format: 0917 123 4567" id="order-phone" />
+            <TextField label="Email" name="email" type="email" autoComplete="email" inputMode="email" value={details.email}
+              onChange={set('email')} onBlur={blur('email')} error={shown('email')} className="span-all"
+              hint="Your order link and receipt go here. There's no account, so use an email you check." id="order-email" />
+            <TextField label="Note for us" name="note" optional multiline value={details.note} onChange={set('note')} onBlur={blur('note')}
+              error={shown('note')} hint="Picking up for someone else? Tell us their name." maxLength={500} className="span-all" id="order-note" />
+          </div>
+        </section>
+      </div>
 
-      <section className="page-section" aria-labelledby="step-check">
-        <h2 id="step-check" className="h-step">3. Check and place</h2>
+      <aside className="col col--snug side" aria-labelledby="step-check">
+        <h2 id="step-check" className="h3 h3--step">3. Check and place</h2>
         <OrderSummary title="Order summary" items={items} totalTarts={totalTarts} total={formatPeso(totalCentavos)}
           maxTarts={maxTartsPerOrder} deadline={hasBoxes ? deadline : undefined} headingLevel={3}
           overLimitAction={<Button variant="secondary" href={messengerUrl}>Message us on Messenger</Button>} />
@@ -110,14 +114,14 @@ export function OrderForm({ products, remainingTarts, maxTartsPerOrder, autoCanc
         </Notice>
         {submitted && Object.keys(errors).length > 0 ? (
           <Notice tone="danger" title="Please check your details">
-            <p>Fix the highlighted fields above, then place your order.</p>
+            <p>Fix the highlighted fields, then place your order.</p>
           </Notice>
         ) : null}
         <Button type="submit" variant="primary" size="lg" block disabled={!hasBoxes || totalTarts > cap}>
           {hasBoxes ? `Place order · ${formatPeso(totalCentavos)}` : 'Choose at least one box'}
         </Button>
-        <p className="fine fine--center">Next: pay and upload your receipt.</p>
-      </section>
+        <p className="muted muted--center">Next: pay and upload your receipt.</p>
+      </aside>
     </form>
   );
 }

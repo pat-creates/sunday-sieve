@@ -1,5 +1,5 @@
-// Order form (TDD §9.2): box size → quantity → details. Placing an order isn't wired to the
-// database yet; on previews it opens the sample order page instead.
+// Order form (TDD §9.2), following the canvas's "Order form" artboards. Placing an order isn't wired
+// to the database yet; on previews it opens the sample order page instead.
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -19,31 +19,33 @@ export default async function OrderPage({ searchParams }: { searchParams: Promis
   const back = state ? `/?state=${encodeURIComponent(state)}` : '/';
 
   return (
-    <div className="page page--compact">
-      <nav className="page-nav" aria-label="Back">
-        <Link className="page-nav__back" href={back}>← Back</Link>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="page-nav__logo" src="/brand/lockup.png" alt="Sunday Sieve" width={96} height={48} />
-      </nav>
-
-      <header className="page-header">
-        <h1 className="h-page h-page--lg">Your order</h1>
-        <p className="lead">
-          For <strong>{bakeDay.bakeDateLabel}</strong>, pickup {bakeDay.pickupWindowLabel} in {pickupArea.split(',')[0]}.
-        </p>
-        <CapacityIndicator remaining={bakeDay.remainingTarts} capacity={bakeDay.capacityTarts} />
-        <p className="fine">Orders close {bakeDay.cutoffLabel}.</p>
+    <div className="pg">
+      <header className="wrap topbar">
+        <Link className="topbar__link" href={back}>← Back</Link>
+        <Link href={back}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/lockup.png" alt="Sunday Sieve home" width={112} height={56} />
+        </Link>
       </header>
-
-      <OrderForm
-        products={products}
-        remainingTarts={bakeDay.remainingTarts}
-        maxTartsPerOrder={settings.maxTartsPerOrder}
-        autoCancelHours={settings.autoCancelHours}
-        cutoffAt={bakeDay.cutoffAt}
-        messengerUrl={site.messengerUrl}
-        sampleOrderHref={`/orders/${SAMPLE_ORDER_NUMBER}?state=awaiting`}
-      />
+      <main className="wrap stack">
+        <header className="sec sec--tight">
+          <h1 className="h1">Your order</h1>
+          <p className="lead">
+            For <strong>{bakeDay.bakeDateLabel}</strong>, pickup {bakeDay.pickupWindowLabel} in {pickupArea.split(',')[0]}.
+          </p>
+          <div className="narrow"><CapacityIndicator remaining={bakeDay.remainingTarts} capacity={bakeDay.capacityTarts} /></div>
+          <p className="muted">Orders close {bakeDay.cutoffLabel}.</p>
+        </header>
+        <OrderForm
+          products={products}
+          remainingTarts={bakeDay.remainingTarts}
+          maxTartsPerOrder={settings.maxTartsPerOrder}
+          autoCancelHours={settings.autoCancelHours}
+          cutoffAt={bakeDay.cutoffAt}
+          messengerUrl={site.messengerUrl}
+          sampleOrderHref={`/orders/${SAMPLE_ORDER_NUMBER}?state=awaiting`}
+        />
+      </main>
     </div>
   );
 }

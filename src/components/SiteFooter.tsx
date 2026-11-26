@@ -11,11 +11,14 @@ export function ContactLine({ prefix = 'Questions?' }: { prefix?: string }) {
   );
 }
 
-export function SiteFooter({ children, center }: { children?: ReactNode; center?: boolean }) {
+/** Page footer. The landing page shows the logo too; order pages add a line before the contact. */
+export function SiteFooter({ children, logo, contactPrefix }: { children?: ReactNode; logo?: boolean; contactPrefix?: string }) {
   return (
-    <footer className={center ? 'site-footer site-footer--center' : 'site-footer'}>
+    <footer className="foot">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {logo ? <img src="/brand/lockup.png" alt="Sunday Sieve" width={96} height={48} /> : null}
       {children}
-      <ContactLine />
+      <ContactLine prefix={contactPrefix} />
     </footer>
   );
 }
