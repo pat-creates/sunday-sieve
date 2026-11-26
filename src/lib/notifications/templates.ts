@@ -36,7 +36,8 @@ const h1 = (t: string) => `<h1 style="margin:0 0 12px;font-family:Georgia,serif;
 const p = (t: string) => `<p style="margin:0 0 12px">${t}</p>`;
 
 function contactFooter(bakeDate?: string) {
-  return `${bakeDate ? `Bake day: ${esc(bakeDate)}.<br>` : ''}Questions? Message us on Facebook (${esc(site.facebookUrl)}) or text ${esc(site.contactNumber)}.`;
+  const text = site.contactNumber ? ` or text ${esc(site.contactNumber)}` : '';
+  return `${bakeDate ? `Bake day: ${esc(bakeDate)}.<br>` : ''}Questions? Message us on Facebook (${esc(site.facebookUrl)})${text}.`;
 }
 
 type Payload = Record<string, unknown>;

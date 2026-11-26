@@ -54,15 +54,4 @@ export function amountReceived(proofs: { verdict: string; amountCentavos: number
   return proofs.reduce((sum, p) => sum + (p.verdict === 'accepted' ? (p.amountCentavos ?? 0) : 0), 0);
 }
 
-/** Philippine mobile: 09XXXXXXXXX, 639XXXXXXXXX or +639XXXXXXXXX, spaces and dashes allowed. Returns +639XXXXXXXXX. */
-export function normalizePhMobile(input: string): string | null {
-  const digits = input.replace(/[\s\-().]/g, '');
-  const m = /^(?:\+?63|0)(9\d{9})$/.exec(digits);
-  return m ? `+63${m[1]}` : null;
-}
-
-/** Reference numbers are typed with spaces as printed on receipts; store letters and digits only. */
-export function normalizeReference(input: string): string | null {
-  const ref = input.replace(/[\s-]/g, '');
-  return /^[A-Za-z0-9]{6,30}$/.test(ref) ? ref.toUpperCase() : null;
-}
+export { normalizePhMobile, normalizeReference } from './validation';
