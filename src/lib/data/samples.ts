@@ -32,7 +32,7 @@ const paymentMethods: PaymentMethodView[] = [
 ];
 
 const settings = { maxTartsPerOrder: 24, autoCancelHours: 24, verificationSlaText: 'by the evening of the next day' };
-const pickupArea = 'Antipolo City, near [landmark]';
+const pickupArea = 'Cainta, Rizal';
 
 /** A Manila wall-clock time on a YYYY-MM-DD date. */
 const manila = (date: string, time: string) => new Date(`${date}T${time}:00+08:00`);
@@ -110,7 +110,7 @@ export function sampleOrder(scenario: OrderScenario, now = new Date()): OrderPag
     pickupWindowLabel: bakeDay.pickupWindowLabel,
     pickupArea,
     pickupAddress: scenario === 'ready'
-      ? { fullAddress: '[House no.] [Street], [Barangay], Antipolo City', mapUrl: 'https://maps.google.com/?q=Antipolo+City',
+      ? { fullAddress: '[House no.] [Street], [Barangay], Cainta, Rizal', mapUrl: 'https://maps.google.com/?q=Cainta+Rizal',
           instructions: 'Ring the bell at the green gate. Parking on the street.', contactNumber: '0917 123 4567' }
       : undefined,
     paymentMethods,

@@ -211,10 +211,10 @@ export default function ComponentsPreview() {
         <Section name="PickupDetails">
           <div className="preview-grid">
             <State label="before ready (area only)">
-              <PickupDetails publicBlurb="Antipolo City, near [landmark]" pickupWindow="Saturday, 15 August · 3:00–7:00 PM" />
+              <PickupDetails publicBlurb="Cainta, Rizal" pickupWindow="Saturday, 15 August · 3:00–7:00 PM" />
             </State>
             <State label="revealed (ready for pickup)">
-              <PickupDetails revealed fullAddress="[House no.] [Street], [Barangay], Antipolo City" mapUrl="#"
+              <PickupDetails revealed fullAddress="[House no.] [Street], [Barangay], Cainta, Rizal" mapUrl="#"
                 instructions="Ring the bell at the green gate." contactNumber="0917 123 4567" pickupWindow="Today, Saturday, 15 August · 3:00–7:00 PM" />
             </State>
           </div>

@@ -16,8 +16,8 @@ INSERT INTO payment_qr_codes (sort_order, provider, account_name, account_hint) 
 
 INSERT INTO pickup_locations (label, public_blurb, full_address, map_url, instructions, contact_number) VALUES
   ('Main pickup point',
-   'Antipolo City, near [landmark]',
-   '[House no.] [Street], [Barangay], Antipolo City',
+   'Cainta, Rizal',
+   '[House no.] [Street], [Barangay], Cainta, Rizal',
    NULL,
    'Ring the bell at the green gate.',
    '[contact number]');
