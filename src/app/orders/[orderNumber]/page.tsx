@@ -60,9 +60,15 @@ export default async function OrderStatusPage({ params, searchParams }: Params) 
               {short ? 'Please send the rest and upload a new receipt' : order.rejectReason ? 'Please upload your receipt again' : 'Pay to lock in your tarts'}
             </h1>
             {order.rejectReason ? (
-              <Notice tone="danger" title="We couldn’t verify your last receipt"><p>{order.rejectReason}</p></Notice>
+              <Notice tone="danger" title={short ? 'Your payment was short' : 'We couldn’t verify your last receipt'}>
+                <p>{order.rejectReason}</p>
+              </Notice>
             ) : null}
-            <PaymentCountdown state="running" deadline={deadline} deadlineAt={order.paymentDeadlineAt} />
+            {/* A short payment is already counted (TDD §9.4); say what happens to it if the rest never arrives. */}
+            <PaymentCountdown state="running" deadline={deadline} deadlineAt={order.paymentDeadlineAt}
+              hint={short
+                ? `If the rest doesn’t arrive by then, the order is cancelled and we refund the ${formatPeso(order.totalCentavos - order.amountDueCentavos)} you sent.`
+                : undefined} />
           </header>
           <section className="page-section" aria-labelledby="pay">
             <h2 id="pay" className="h-step">1. Send {due}</h2>

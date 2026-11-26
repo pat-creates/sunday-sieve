@@ -4,7 +4,7 @@ import { BakeDayPanel, BoxSizeCard, Button, FaqItem, HowItWorks, PickupDetails, 
 import { SiteFooter } from '@/components/SiteFooter';
 import { getLandingData } from '@/lib/data';
 import { site } from '@/lib/site';
-import hero from '@/assets/hero-tarts.jpg';
+import hero from '@/assets/hero-tarts-box.jpg';
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
   const { state } = await searchParams;
@@ -19,7 +19,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="page-hero__logo" src="/brand/lockup.png" alt="Sunday Sieve" width={220} height={109} />
         <h1 className="page-hero__title">Homemade egg tarts, baked in small batches on weekends.</h1>
-        <Image className="page-hero__photo" src={hero} alt="A tray of golden egg tarts fresh from the oven" priority
+        <Image className="page-hero__photo" src={hero} alt="Four golden egg tarts in a white box" priority
           sizes="(min-width: 560px) 528px, 100vw" placeholder="blur" />
       </header>
 
