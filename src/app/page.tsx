@@ -98,7 +98,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
                 <h2 id="boxes-title" className="h2">The boxes</h2>
                 <p className="text">Every tart is baked the morning of pickup. Mix and match up to {settings.maxTartsPerOrder} tarts per order.</p>
               </div>
-              <div className="desk"><Button variant="primary" size="lg" href={orderHref()}>{orderCta}</Button></div>
             </div>
           ) : (
             <>

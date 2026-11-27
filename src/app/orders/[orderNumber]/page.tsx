@@ -216,7 +216,7 @@ export default async function OrderStatusPage({ params, searchParams }: Params) 
         </header>
         <div className="cols">
           {main}
-          <aside className="col side">{side}</aside>
+          <aside className="col">{side}</aside>
         </div>
         {footer}
       </main>

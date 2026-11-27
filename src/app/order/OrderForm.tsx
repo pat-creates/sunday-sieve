@@ -99,7 +99,7 @@ export function OrderForm({ products, initialProductId, faqHref, remainingTarts,
               error={shown('name')} id="order-name" />
             <TextField label="Mobile number" name="phone" type="tel" autoComplete="tel" inputMode="tel" value={details.phone}
               onChange={set('phone')} onBlur={blur('phone')} error={shown('phone')}
-              hint="Only if something goes wrong. 0917 123 4567" id="order-phone" />
+              hint="Only if something goes wrong." placeholder="0917 123 4567" id="order-phone" />
             <TextField label="Note for us" name="note" optional multiline value={details.note} onChange={set('note')} onBlur={blur('note')}
               error={shown('note')} hint="Picking up for someone else? Tell us their name." maxLength={500} className="span-all" id="order-note" />
           </div>

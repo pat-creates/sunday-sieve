@@ -347,6 +347,7 @@
 
   /* ---------- ProofUpload (TDD §9.3, §7.3) ---------- */
   function ProofUpload(props) {
+    var whyId = useId();
     var autoId = useId();
     var state = props.state || 'empty';
     var id = props.id || autoId;
@@ -361,7 +362,16 @@
           onChange: function (e) { if (props.onFileSelect) props.onFileSelect(e.target.files && e.target.files[0]); } })),
       hasErr ? h('p', { id: errId, className: 'ss-field__error', role: 'alert' }, props.error) : null,
       props.showReference === false ? null : h(TextField, { label: 'Reference number', required: true, autoComplete: 'off', hint: props.referenceHint || 'On your receipt. GCash: \u201CRef No.\u201D under the amount. Bank apps: \u201CReference no.\u201D or \u201CTransaction ID\u201D.', error: props.referenceError, value: props.referenceNote, onChange: props.onReferenceChange, disabled: busy }),
-      h(Button, { variant: 'primary', block: true, disabled: busy || state === 'error' || !props.fileName || (props.referenceNote !== undefined && !String(props.referenceNote).trim()), onClick: props.onSubmit }, busy ? 'Uploading…' : 'Send receipt'));
+      (function () {
+        var noFile = !props.fileName, noRef = props.referenceNote !== undefined && !String(props.referenceNote).trim();
+        var blocked = busy || state === 'error' || noFile || noRef;
+        var why = busy || state === 'error' ? null
+          : noFile && noRef ? 'Add your receipt and reference number to send.'
+          : noFile ? 'Add your receipt to send.' : noRef ? 'Add the reference number to send.' : null;
+        return h(React.Fragment, null,
+          h(Button, { variant: 'primary', block: true, disabled: blocked, onClick: props.onSubmit, 'aria-describedby': why ? whyId : undefined }, busy ? 'Uploading…' : 'Send receipt'),
+          why ? h('p', { id: whyId, className: 'ss-upload__why' }, why) : null);
+      })());
   }
 
   /* ---------- OrderProgress (TDD §4) ---------- */

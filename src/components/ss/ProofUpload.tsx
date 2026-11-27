@@ -28,9 +28,15 @@ export function ProofUpload({ state = 'empty', fileName, error, onFileSelect, re
   const autoId = useId();
   const id = idProp || autoId;
   const busy = state === 'uploading';
+  const whyId = useId();
   const errId = `${id}-err`;
   const hasErr = state === 'error' && !!error;
-  const missingRef = referenceNote !== undefined && !String(referenceNote).trim();
+  const noFile = !fileName;
+  const noRef = referenceNote !== undefined && !String(referenceNote).trim();
+  const blocked = busy || state === 'error' || noFile || noRef;
+  const why = busy || state === 'error' ? null
+    : noFile && noRef ? 'Add your receipt and reference number to send.'
+    : noFile ? 'Add your receipt to send.' : noRef ? 'Add the reference number to send.' : null;
   return (
     <div className={cx('ss-upload', `ss-upload--${state}`, className)}>
       <label className="ss-upload__zone" htmlFor={id}>
@@ -48,9 +54,10 @@ export function ProofUpload({ state = 'empty', fileName, error, onFileSelect, re
           hint={referenceHint || 'On your receipt. GCash: “Ref No.” under the amount. Bank apps: “Reference no.” or “Transaction ID”.'}
           error={referenceError} value={referenceNote} onChange={onReferenceChange} disabled={busy} />
       ) : null}
-      <Button variant="primary" block disabled={busy || state === 'error' || !fileName || missingRef} onClick={onSubmit}>
+      <Button variant="primary" block disabled={blocked} onClick={onSubmit} aria-describedby={why ? whyId : undefined}>
         {busy ? 'Uploading…' : 'Send receipt'}
       </Button>
+      {why ? <p id={whyId} className="ss-upload__why">{why}</p> : null}
     </div>
   );
 }
