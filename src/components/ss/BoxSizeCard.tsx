@@ -21,6 +21,10 @@ export interface BoxSizeCardProps {
   /** Most boxes of this size the order can still take. */
   max?: number;
   disabled?: boolean;
+  /** Landing menu: makes the whole card a link, e.g. to the order form with this box added. Ignored with a stepper. */
+  href?: string;
+  /** Text under the price on a linked card. Default "Choose this box →". */
+  linkLabel?: string;
   headingLevel?: HeadingLevel;
   className?: string;
 }
@@ -28,9 +32,10 @@ export interface BoxSizeCardProps {
 export function BoxSizeCard(props: BoxSizeCardProps) {
   const selected = (props.quantity || 0) > 0;
   const H = headingTag(props.headingLevel, 3);
+  const linked = !!props.href && !props.onQuantityChange && !props.disabled;
   return (
     <article className={cx('ss-box', props.layout === 'row' && 'ss-box--row', selected && 'ss-box--selected',
-      props.disabled && 'ss-box--disabled', props.className)}>
+      props.disabled && 'ss-box--disabled', linked && 'ss-box--link', props.className)}>
       <div className="ss-box__media">
         {props.image ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -43,11 +48,12 @@ export function BoxSizeCard(props: BoxSizeCardProps) {
         )}
       </div>
       <div className="ss-box__body">
-        <H className="ss-box__name">{props.name}</H>
+        <H className="ss-box__name">{linked ? <a className="ss-box__link" href={props.href}>{props.name}</a> : props.name}</H>
         <p className="ss-box__meta">
           {props.subtitle ? `${props.subtitle} · ${props.tartCount} egg tarts` : `${props.tartCount} egg tarts`}
         </p>
         <p className="ss-box__price">{props.price}</p>
+        {linked ? <span className="ss-box__go" aria-hidden="true">{props.linkLabel || 'Choose this box →'}</span> : null}
         {props.onQuantityChange ? (
           <QuantityStepper value={props.quantity || 0} max={props.max} disabled={props.disabled}
             onChange={props.onQuantityChange} label={`Number of ${props.name}`} itemName={props.name} />

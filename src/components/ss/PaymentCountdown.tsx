@@ -14,6 +14,10 @@ export interface PaymentCountdownProps {
   remainingText?: string;
   /** settings.verification_sla_text. Default "by the evening of the next day". */
   slaText?: string;
+  /** One line for phones: "Pay ₱630.00 by Tuesday, 11 August, 8:15 PM [23h 14m left]". Running state only. */
+  compact?: boolean;
+  /** With compact: the amount to pay. */
+  amount?: string;
   hint?: string;
   className?: string;
 }
@@ -30,7 +34,7 @@ function formatLeft(ms: number): string | null {
 }
 
 /** The payment deadline with a live countdown (TDD §9.3, §9.6). */
-export function PaymentCountdown({ state = 'running', deadline, deadlineAt, remainingText, slaText, hint, className }: PaymentCountdownProps) {
+export function PaymentCountdown({ state = 'running', deadline, deadlineAt, remainingText, slaText, compact, amount, hint, className }: PaymentCountdownProps) {
   const target = deadlineAt ? new Date(deadlineAt).getTime() : null;
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -57,6 +61,17 @@ export function PaymentCountdown({ state = 'running', deadline, deadlineAt, rema
         <p className="ss-count__head">Payment window closed</p>
         <p className="ss-count__text">
           This order was cancelled because payment didn’t arrive by {deadline}. If you already paid, reply to your order email or message us.
+        </p>
+      </div>
+    );
+  }
+
+  if (compact) {
+    return (
+      <div className={cx('ss-count', 'ss-count--compact', className)} role="timer" aria-live="off">
+        <p className="ss-count__head">
+          <span>{amount ? `Pay ${amount} by ` : 'Pay by '}<strong>{deadline}</strong></span>
+          {left ? <span className="ss-count__inline" suppressHydrationWarning>{left}</span> : null}
         </p>
       </div>
     );

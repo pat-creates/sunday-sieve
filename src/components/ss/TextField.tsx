@@ -29,11 +29,11 @@ export function TextField({ label, hint, error, multiline, optional, className, 
         {label}
         {optional ? <span className="ss-field__opt"> (optional)</span> : null}
       </label>
-      {hint ? <p id={hintId} className="ss-field__hint">{hint}</p> : null}
       {multiline
         ? <textarea {...common} rows={3} {...rest} onChange={onChange as ChangeEventHandler<HTMLTextAreaElement>} />
         : <input {...common} {...rest} onChange={onChange as ChangeEventHandler<HTMLInputElement>} />}
       {error ? <p id={errId} className="ss-field__error">{error}</p> : null}
+      {hint ? <p id={hintId} className="ss-field__hint">{hint}</p> : null}
     </div>
   );
 }

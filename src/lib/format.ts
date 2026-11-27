@@ -47,6 +47,23 @@ export function formatWindow(start: Date, end: Date): string {
   return `${sameHalf ? s.slice(0, -3) : s}–${e}`;
 }
 
+/** "Sat 5 Dec", for the one-line bake day bar. */
+export function formatShortDay(d: Date): string {
+  const p = parts(d, { weekday: 'short', day: 'numeric', month: 'short' });
+  return `${p.weekday} ${p.day} ${p.month}`;
+}
+
+/** "Fri 6 PM" or "Fri 6:30 PM", for the one-line bake day bar. */
+export function formatShortDayTime(d: Date): string {
+  const weekday = parts(d, { weekday: 'short' }).weekday;
+  return `${weekday} ${formatTime(d).replace(':00 ', ' ')}`;
+}
+
+/** "Friday" */
+export function formatWeekday(d: Date): string {
+  return parts(d, { weekday: 'long' }).weekday;
+}
+
 /** A bake_date (YYYY-MM-DD, a calendar date) as "Saturday, 15 August". */
 export function formatBakeDate(isoDate: string): string {
   return formatDay(new Date(`${isoDate}T12:00:00+08:00`));

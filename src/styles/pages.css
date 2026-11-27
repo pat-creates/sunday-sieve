@@ -41,10 +41,15 @@ a:hover { color: var(--ink); }
 .foot { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; align-items: center; padding-top: 24px;
   border-top: 1px solid var(--line); font-size: 14px; line-height: 20px; color: var(--ink-muted); }
 .foot img { width: 96px; height: auto; display: block; }
+/* Footer links get a 44px tap area, like every other control. */
+.foot a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px; }
+
+/* Phone-only bake day bar, full width directly under the top bar. */
+.bar { margin: -8px 0 8px; }
 
 /* Landing page */
 .hero { display: flex; flex-direction: column; gap: 28px; }
-.hero-photo { position: relative; margin: 0 -20px; aspect-ratio: 4 / 3; overflow: hidden; background: var(--surface-sunken); }
+.hero-photo { position: relative; margin: 0 -20px; aspect-ratio: 16 / 9; overflow: hidden; background: var(--surface-sunken); }
 .hero-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .sticker { position: absolute; top: 20px; right: 20px; width: 104px; height: 104px; border-radius: 52px; background: var(--sun-yellow);
   color: var(--on-accent); display: flex; align-items: center; justify-content: center; text-align: center; font-family: var(--font-accent);
@@ -63,6 +68,7 @@ a:hover { color: var(--ink); }
 
 /* Order form */
 .fields { display: grid; gap: 16px; }
+.policies { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
 
 /* Order page */
 .order-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
@@ -92,7 +98,7 @@ a:hover { color: var(--ink); }
   .phone { display: none; }
   .desk { display: block; }
   .boxes-cards.desk { display: flex; }
-  .cols { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 56px; align-items: start; }
+  .cols { display: grid; grid-template-columns: minmax(0, 560px) 400px; justify-content: space-between; gap: 56px; align-items: start; }
   .side { position: sticky; top: 24px; }
   .narrow { max-width: 440px; }
   .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }

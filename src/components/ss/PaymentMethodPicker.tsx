@@ -24,14 +24,16 @@ export interface PaymentMethodPickerProps {
   onChange?: (provider: string) => void;
   /** Accessible name of the options. Default "Payment method". */
   label?: string;
-  /** Tip under the QR card. Default: how to pay from the same phone. Pass "" to hide it. */
+  /** Tip under the QR card on touch screens. Default: how to pay from the same phone. Pass "" to hide it. */
   tip?: string;
+  /** Tip shown instead on computers (mouse). Default: "Open GCash on your phone and scan this code." Pass "" to hide it. */
+  desktopTip?: string;
   headingLevel?: HeadingLevel;
   className?: string;
 }
 
 /** One QR code at a time, picked from a row of channel buttons (TDD §9.3). */
-export function PaymentMethodPicker({ methods = [], amount, value, defaultValue, onChange, label, tip, headingLevel, className }: PaymentMethodPickerProps) {
+export function PaymentMethodPicker({ methods = [], amount, value, defaultValue, onChange, label, tip, desktopTip, headingLevel, className }: PaymentMethodPickerProps) {
   const [inner, setInner] = useState(defaultValue || methods[0]?.provider);
   const selected = value !== undefined ? value : inner;
   const current = methods.find((m) => m.provider === selected) || methods[0];
@@ -39,9 +41,11 @@ export function PaymentMethodPicker({ methods = [], amount, value, defaultValue,
     if (value === undefined) setInner(p);
     onChange?.(p);
   }
+  const prov = current ? current.provider : 'payment';
   const tipText = tip === undefined
-    ? `Paying from this phone? Take a screenshot of the QR code, then in your ${current ? current.provider : 'payment'} app choose “Upload QR” or scan from your gallery.`
+    ? `Paying from this phone? Take a screenshot of the QR code, then in your ${prov} app choose “Upload QR” or scan from your gallery.`
     : tip;
+  const deskTip = desktopTip === undefined ? `Open ${prov} on your phone and scan this code.` : desktopTip;
   return (
     <div className={cx('ss-picker', className)}>
       <div className="ss-picker__options" role="group" aria-label={label || 'Payment method'}>
@@ -59,7 +63,8 @@ export function PaymentMethodPicker({ methods = [], amount, value, defaultValue,
         <PaymentQRCard provider={current.provider} qrSrc={current.qrSrc} accountName={current.accountName}
           accountHint={current.accountHint} amount={amount} headingLevel={headingLevel} className="ss-picker__card" />
       ) : null}
-      {tipText ? <p className="ss-picker__tip">{tipText}</p> : null}
+      {tipText ? <p className="ss-picker__tip ss-picker__tip--touch">{tipText}</p> : null}
+      {deskTip ? <p className="ss-picker__tip ss-picker__tip--mouse">{deskTip}</p> : null}
     </div>
   );
 }

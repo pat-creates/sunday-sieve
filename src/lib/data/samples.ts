@@ -1,7 +1,7 @@
 // Sample data for building the customer pages before they're wired to the database.
 // Content follows the Sunday Sieve canvas; dates are relative to now, so deadlines and
 // countdowns always look real.
-import { formatBakeDate, formatDateTime, formatWindow } from '@/lib/format';
+import { formatBakeDate, formatDateTime, formatShortDay, formatShortDayTime, formatWeekday, formatWindow } from '@/lib/format';
 import type { BakeDayView, LandingData, OrderPageData, PaymentMethodView, ProductView } from './types';
 
 const HOUR = 3_600_000;
@@ -63,6 +63,9 @@ function sampleBakeDay(scenario: Exclude<LandingScenario, 'none'>, now: Date): B
     bakeDateLabel: formatBakeDate(bakeDate),
     pickupWindowLabel: formatWindow(pickupStartsAt, pickupEndsAt),
     cutoffLabel: formatDateTime(cutoffAt),
+    bakeDateShort: formatShortDay(pickupStartsAt),
+    cutoffShort: formatShortDayTime(cutoffAt),
+    cutoffWeekday: formatWeekday(cutoffAt),
     cutoffAt: cutoffAt.toISOString(),
     pickupStartsAt: pickupStartsAt.toISOString(),
     capacityTarts: 96,

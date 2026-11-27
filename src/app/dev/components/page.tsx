@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import {
-  BakeDayPanel, BoxSizeCard, Button, CapacityIndicator, FaqItem, HowItWorks, Notice, OrderNumber, OrderProgress,
+  BakeDayBar, BakeDayPanel, BoxSizeCard, Button, CapacityIndicator, FaqItem, HowItWorks, Notice, OrderNumber, OrderProgress,
   OrderSummary, PaymentCountdown, PaymentMethodPicker, PaymentQRCard, PickupDetails, StatusBadge, TextField, formatPeso,
 } from '@/components/ss';
 import type { OrderStatus } from '@/lib/db/schema';
@@ -19,7 +19,7 @@ const STATUSES: OrderStatus[] = [
 ];
 
 const SECTIONS = [
-  'BakeDayPanel', 'CapacityIndicator', 'BoxSizeCard', 'OrderBuilder', 'OrderSummary', 'TextField', 'Button', 'Notice',
+  'BakeDayBar', 'BakeDayPanel', 'CapacityIndicator', 'BoxSizeCard', 'OrderBuilder', 'OrderSummary', 'TextField', 'Button', 'Notice',
   'StatusBadge', 'OrderNumber', 'OrderProgress', 'PaymentCountdown', 'PaymentMethodPicker', 'PaymentQRCard',
   'ProofUpload', 'PickupDetails', 'HowItWorks', 'FaqItem',
 ];
@@ -66,6 +66,16 @@ export default function ComponentsPreview() {
       </header>
 
       <main className="preview-main">
+        <Section name="BakeDayBar" note="The bake day in one line, for the top of the landing page on phones.">
+          <div className="preview-grid">
+            <State label="open"><BakeDayBar state="open" bakeDate="Sat 5 Dec" cutoff="Fri 6 PM" remaining={36} orderHref="#" /></State>
+            <State label="almost sold out"><BakeDayBar state="open" bakeDate="Sat 5 Dec" cutoff="Fri 6 PM" remaining={12} orderHref="#" /></State>
+            <State label="sold out"><BakeDayBar state="soldout" bakeDate="Sat 5 Dec" remaining={0} followHref="#" /></State>
+            <State label="closed"><BakeDayBar state="closed" bakeDate="Sat 5 Dec" remaining={40} followHref="#" /></State>
+            <State label="none"><BakeDayBar state="none" followHref="#" /></State>
+          </div>
+        </Section>
+
         <Section name="BakeDayPanel" note="The landing page's next-batch panel: open, sold out, closed and no batch, plus open but almost sold out.">
           <div className="preview-grid">
             <State label="open"><BakeDayPanel state="open" {...panel} remaining={36} note="Adding ube tarts this week!" orderHref="#" /></State>
@@ -90,6 +100,13 @@ export default function ComponentsPreview() {
             <div className="preview-row">
               {sampleProducts.map((p) => (
                 <BoxSizeCard key={p.key} name={p.name} subtitle={p.subtitle} tartCount={p.tartCount} price={formatPeso(p.priceCentavos)} />
+              ))}
+            </div>
+          </State>
+          <State label="card, linked (landing menu)">
+            <div className="preview-row">
+              {sampleProducts.map((p) => (
+                <BoxSizeCard key={p.key} name={p.name} subtitle={p.subtitle} tartCount={p.tartCount} price={formatPeso(p.priceCentavos)} href="#" />
               ))}
             </div>
           </State>
@@ -177,7 +194,7 @@ export default function ComponentsPreview() {
           <div className="preview-grid">
             {STATUSES.map((s) => (
               <State key={s} label={s}>
-                <OrderProgress status={s} reason={s === 'CANCELLED' ? 'Payment didn’t arrive by Tuesday, 11 August, 8:15 PM.' : undefined} />
+                <OrderProgress status={s} title={s === 'CANCELLED' ? undefined : 'Where your order is'} reason={s === 'CANCELLED' ? 'Payment didn’t arrive by Tuesday, 11 August, 8:15 PM.' : undefined} />
               </State>
             ))}
           </div>
@@ -186,6 +203,7 @@ export default function ComponentsPreview() {
         <Section name="PaymentCountdown" note="The running state counts down live from a deadline 23 hours away.">
           <div className="preview-grid">
             <State label="running"><PaymentCountdown state="running" deadline="Tuesday, 11 August, 8:15 PM" deadlineAt={inADay} /></State>
+            <State label="running, compact (phones)"><PaymentCountdown state="running" compact amount="₱630.00" deadline="Tuesday, 11 August, 8:15 PM" deadlineAt={inADay} /></State>
             <State label="paused (receipt uploaded)"><PaymentCountdown state="paused" slaText="by the evening of the next day" /></State>
             <State label="expired"><PaymentCountdown state="expired" deadline="Tuesday, 11 August, 8:15 PM" /></State>
           </div>

@@ -13,6 +13,11 @@ export interface BakeDayView {
   pickupWindowLabel: string;
   /** "Friday, 28 November at 6:00 PM" */
   cutoffLabel: string;
+  /** Short forms for the phone bake day bar: "Sat 5 Dec", "Fri 6 PM". */
+  bakeDateShort: string;
+  cutoffShort: string;
+  /** "Friday": the cutoff's weekday, for "Pre-order by Friday". */
+  cutoffWeekday: string;
   /** ISO timestamps, for deadline arithmetic in the browser. */
   cutoffAt: string;
   pickupStartsAt: string;

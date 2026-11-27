@@ -9,6 +9,10 @@ import { validateOrderDetails, type OrderDetails } from '@/lib/validation';
 
 interface Props {
   products: ProductView[];
+  /** The box picked on the landing page menu, added once to start with. */
+  initialProductId?: string;
+  /** Where "Full policies" goes: the landing page FAQ. */
+  faqHref: string;
   remainingTarts: number;
   maxTartsPerOrder: number;
   autoCancelHours: number;
@@ -20,11 +24,11 @@ interface Props {
 }
 
 type Field = keyof OrderDetails;
-const FIELD_ORDER: Field[] = ['name', 'email', 'phone', 'note'];
+const FIELD_ORDER: Field[] = ['email', 'name', 'phone', 'note']; // the order they appear on the form
 
-export function OrderForm({ products, remainingTarts, maxTartsPerOrder, autoCancelHours, cutoffAt, messengerUrl, sampleOrderHref }: Props) {
+export function OrderForm({ products, initialProductId, faqHref, remainingTarts, maxTartsPerOrder, autoCancelHours, cutoffAt, messengerUrl, sampleOrderHref }: Props) {
   const router = useRouter();
-  const [qty, setQty] = useState<Record<string, number>>({});
+  const [qty, setQty] = useState<Record<string, number>>(() => (initialProductId ? { [initialProductId]: 1 } : {}));
   const [details, setDetails] = useState<OrderDetails>({ name: '', email: '', phone: '', note: '' });
   const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -88,29 +92,32 @@ export function OrderForm({ products, remainingTarts, maxTartsPerOrder, autoCanc
         <section className="sec" aria-labelledby="step-details">
           <h2 id="step-details" className="h3 h3--step">2. Your details</h2>
           <div className="fields">
+            <TextField label="Email" name="email" type="email" autoComplete="email" inputMode="email" value={details.email}
+              onChange={set('email')} onBlur={blur('email')} error={shown('email')} className="span-all"
+              hint="Your order link and receipt go here. There's no account, so use an email you check." id="order-email" />
             <TextField label="Name" name="name" autoComplete="name" value={details.name} onChange={set('name')} onBlur={blur('name')}
               error={shown('name')} id="order-name" />
             <TextField label="Mobile number" name="phone" type="tel" autoComplete="tel" inputMode="tel" value={details.phone}
               onChange={set('phone')} onBlur={blur('phone')} error={shown('phone')}
-              hint="Only if something goes wrong. Format: 0917 123 4567" id="order-phone" />
-            <TextField label="Email" name="email" type="email" autoComplete="email" inputMode="email" value={details.email}
-              onChange={set('email')} onBlur={blur('email')} error={shown('email')} className="span-all"
-              hint="Your order link and receipt go here. There's no account, so use an email you check." id="order-email" />
+              hint="Only if something goes wrong. 0917 123 4567" id="order-phone" />
             <TextField label="Note for us" name="note" optional multiline value={details.note} onChange={set('note')} onBlur={blur('note')}
               error={shown('note')} hint="Picking up for someone else? Tell us their name." maxLength={500} className="span-all" id="order-note" />
           </div>
         </section>
       </div>
 
-      <aside className="col col--snug side" aria-labelledby="step-check">
-        <h2 id="step-check" className="h3 h3--step">3. Check and place</h2>
-        <OrderSummary title="Order summary" items={items} totalTarts={totalTarts} total={formatPeso(totalCentavos)}
-          maxTarts={maxTartsPerOrder} deadline={hasBoxes ? deadline : undefined} headingLevel={3}
+      <aside className="col col--snug side" aria-label="Check and place your order">
+        <OrderSummary title="Your order" items={items} totalTarts={totalTarts} total={formatPeso(totalCentavos)}
+          maxTarts={maxTartsPerOrder} deadline={hasBoxes ? deadline : undefined} headingLevel={2}
           overLimitAction={<Button variant="secondary" href={messengerUrl}>Message us on Messenger</Button>} />
-        <Notice tone="info" title="Before you place your order">
-          <p>You’ll pay by GCash or bank transfer on the next page. Unpaid orders are released at the payment deadline. Paid orders can’t be cancelled, because we bake to order.</p>
-          <p className="notice-gap">Orders not collected by the end of the pickup window are forfeited and not refunded. If you can’t make it, message us before the window closes.</p>
-          <p className="notice-gap">If we have to cancel a paid order, we refund the full amount to the account you paid from within 3 days.</p>
+        {/* The short checkout version of the policies; the FAQ keeps the exact wording. */}
+        <Notice tone="info" title="Before you pay">
+          <ul className="policies">
+            <li>Unpaid orders are released at the payment deadline.</li>
+            <li>No-shows forfeit the order; message us if you can’t make it.</li>
+            <li>If we cancel a paid order, you get a full refund within 3 days.</li>
+          </ul>
+          <p className="notice-gap"><a href={faqHref}>Full policies</a></p>
         </Notice>
         {submitted && Object.keys(errors).length > 0 ? (
           <Notice tone="danger" title="Please check your details">

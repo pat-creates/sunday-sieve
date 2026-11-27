@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { OrderStatus } from '@/lib/db/schema';
 import { Notice } from './Notice';
-import { cx } from './util';
+import { cx, headingTag, type HeadingLevel } from './util';
 
 const STEPS = [
   { key: 'placed', label: 'Order placed' },
@@ -19,13 +19,25 @@ export interface OrderProgressProps {
   status: OrderStatus;
   /** For CANCELLED: the reason shown to the customer. */
   reason?: ReactNode;
+  /** With a title, the list sits in a card like OrderSummary and PickupDetails, e.g. "Where your order is". */
+  title?: string;
+  headingLevel?: HeadingLevel;
   className?: string;
 }
 
 /** Where the order is in its lifecycle (TDD §4). */
-export function OrderProgress({ status, reason, className }: OrderProgressProps) {
+export function OrderProgress({ status, reason, title, headingLevel, className }: OrderProgressProps) {
   if (status === 'CANCELLED') {
     return <Notice tone="danger" title="This order was cancelled" className={className}>{reason || null}</Notice>;
+  }
+  if (title) {
+    const H = headingTag(headingLevel, 3);
+    return (
+      <section className={cx('ss-progress-card', className)}>
+        <H className="ss-progress-card__title">{title}</H>
+        <OrderProgress status={status} />
+      </section>
+    );
   }
   const cur = INDEX[status] ?? 0;
   return (

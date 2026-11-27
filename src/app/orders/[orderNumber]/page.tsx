@@ -59,12 +59,7 @@ export default async function OrderStatusPage({ params, searchParams }: Params) 
     <OrderSummary title={title} headingLevel={2} totalTarts={order.totalTarts} total={formatPeso(order.totalCentavos)}
       items={order.items.map((i) => ({ name: i.name, quantity: i.quantity, lineTotal: formatPeso(i.lineTotalCentavos) }))} />
   );
-  const progress = (
-    <section className="sec sec--tight" aria-labelledby="where">
-      <h2 id="where" className="h3">Where your order is</h2>
-      <OrderProgress status={order.status} />
-    </section>
-  );
+  const progress = <OrderProgress status={order.status} title="Where your order is" headingLevel={2} />;
   const pickupArea = <PickupDetails publicBlurb={order.pickupArea} pickupWindow={pickupWindow} headingLevel={2} />;
   const bookmark = <span>Bookmark this page. The link is also in your Order Received email.</span>;
 
@@ -86,22 +81,29 @@ export default async function OrderStatusPage({ params, searchParams }: Params) 
                 <p>{order.rejectReason}</p>
               </Notice>
             ) : null}
+            {/* Phones: one compact line, so the payment buttons show in the first screen. */}
+            <div className="phone">
+              <PaymentCountdown state="running" compact amount={due} deadline={deadline} deadlineAt={order.paymentDeadlineAt} />
+            </div>
             {/* A short payment is already counted (TDD §9.4); say what happens to it if the rest never arrives. */}
-            <PaymentCountdown state="running" deadline={deadline} deadlineAt={order.paymentDeadlineAt}
-              hint={short ? `If the rest doesn’t arrive by then, the order is cancelled and we refund the ${formatPeso(received)} you sent.` : undefined} />
+            <div className="desk">
+              <PaymentCountdown state="running" deadline={deadline} deadlineAt={order.paymentDeadlineAt}
+                hint={short ? `If the rest doesn’t arrive by then, the order is cancelled and we refund the ${formatPeso(received)} you sent.` : undefined} />
+            </div>
+            {short ? <p className="muted phone">If the rest doesn’t arrive by then, the order is cancelled and we refund the {formatPeso(received)} you sent.</p> : null}
           </div>
           <section className="sec" aria-labelledby="pay">
             <h2 id="pay" className="h3">1. Send {due}</h2>
             <p className="text">Pick how you’ll pay, then send the exact amount.</p>
-            <div className="narrow"><PaymentMethodPicker methods={order.paymentMethods} amount={due} headingLevel={3} /></div>
+            <PaymentMethodPicker methods={order.paymentMethods} amount={due} headingLevel={3} />
           </section>
           <section className="sec" aria-labelledby="upload">
             <h2 id="upload" className="h3">2. Upload your receipt</h2>
-            <div className="narrow"><ReceiptUpload sampleNextHref={`${self}?state=verifying`} /></div>
+            <ReceiptUpload sampleNextHref={`${self}?state=verifying`} />
           </section>
         </div>
       );
-      side = <>{summary()}{pickupArea}{progress}</>;
+      side = <>{summary()}{progress}{pickupArea}</>;
       break;
     }
     case 'PAYMENT_UNDER_REVIEW':

@@ -10,8 +10,8 @@ import { OrderForm } from './OrderForm';
 
 export const metadata: Metadata = { title: 'Order egg tarts — Sunday Sieve' };
 
-export default async function OrderPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
-  const { state } = await searchParams;
+export default async function OrderPage({ searchParams }: { searchParams: Promise<{ state?: string; add?: string }> }) {
+  const { state, add } = await searchParams;
   const data = await getOrderFormData(state);
   // Closed, sold out or nothing scheduled: the landing page explains why.
   if (!data?.bakeDay) redirect(state ? `/?state=${encodeURIComponent(state)}` : '/');
@@ -31,13 +31,15 @@ export default async function OrderPage({ searchParams }: { searchParams: Promis
         <header className="sec sec--tight">
           <h1 className="h1">Your order</h1>
           <p className="lead">
-            For <strong>{bakeDay.bakeDateLabel}</strong>, pickup {bakeDay.pickupWindowLabel} in {pickupArea.split(',')[0]}.
+            For <strong>{bakeDay.bakeDateLabel}</strong>, pickup {bakeDay.pickupWindowLabel} in {pickupArea}.
           </p>
           <div className="narrow"><CapacityIndicator remaining={bakeDay.remainingTarts} capacity={bakeDay.capacityTarts} /></div>
           <p className="muted">Orders close {bakeDay.cutoffLabel}.</p>
         </header>
         <OrderForm
           products={products}
+          initialProductId={products.some((p) => p.id === add) ? add : undefined}
+          faqHref={state ? `/?state=${encodeURIComponent(state)}#questions` : '/#questions'}
           remainingTarts={bakeDay.remainingTarts}
           maxTartsPerOrder={settings.maxTartsPerOrder}
           autoCancelHours={settings.autoCancelHours}

@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"SundaySieve","components":[{"name":"Button"},{"name":"StatusBadge"},{"name":"Notice"},{"name":"OrderNumber"},{"name":"BakeDayPanel"},{"name":"CapacityIndicator"},{"name":"HowItWorks"},{"name":"FaqItem"},{"name":"BoxSizeCard"},{"name":"QuantityStepper"},{"name":"TextField"},{"name":"OrderSummary"},{"name":"PaymentCountdown"},{"name":"PaymentQRCard"},{"name":"PaymentMethodPicker"},{"name":"ProofUpload"},{"name":"OrderProgress"},{"name":"PickupDetails"}]} */
+/* @ds-bundle: {"format":4,"namespace":"SundaySieve","components":[{"name":"Button"},{"name":"StatusBadge"},{"name":"Notice"},{"name":"OrderNumber"},{"name":"BakeDayPanel"},{"name":"BakeDayBar"},{"name":"CapacityIndicator"},{"name":"HowItWorks"},{"name":"FaqItem"},{"name":"BoxSizeCard"},{"name":"QuantityStepper"},{"name":"TextField"},{"name":"OrderSummary"},{"name":"PaymentCountdown"},{"name":"PaymentQRCard"},{"name":"PaymentMethodPicker"},{"name":"ProofUpload"},{"name":"OrderProgress"},{"name":"PickupDetails"}]} */
 (function () {
   var React = window.React;
   var h = React.createElement;
@@ -105,6 +105,34 @@
         h('span', { className: 'ss-cap__fill', style: { width: taken + '%' } })));
   }
 
+  /* The one label for the main order action everywhere: "Order for Saturday". */
+  function orderLabel(bakeDate) {
+    var day = bakeDate ? String(bakeDate).split(/[ ,]/)[0] : '';
+    return /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/i.test(day) ? 'Order for ' + day : 'Order now';
+  }
+
+  /* ---------- BakeDayBar: the bake day in one line, for the top of a phone screen ---------- */
+  function BakeDayBar(props) {
+    var state = props.state || 'open';
+    var remaining = props.remaining;
+    var almostAt = props.almostSoldOutAt == null ? 24 : props.almostSoldOutAt;
+    var full = state === 'soldout' || (state === 'open' && remaining <= 0);
+    var quiet = full || state === 'closed' || state === 'none';
+    var almost = !quiet && remaining <= almostAt;
+    var parts;
+    if (state === 'none') parts = [h('strong', { key: 'a' }, 'No batch scheduled yet')];
+    else if (quiet) parts = [h('strong', { key: 'a' }, props.bakeDate), ' \u00b7 ', full ? 'Sold out' : 'Orders closed'];
+    else parts = [
+      h('strong', { key: 'a', className: 'ss-bar__lead' }, 'Next batch: ' + props.bakeDate),
+      almost ? h('span', { key: 'b', className: 'ss-bar__urgent' }, h('span', { className: 'ss-cap__dot', 'aria-hidden': 'true' }), 'Only ' + remaining + ' left') : remaining + ' tarts left',
+      props.cutoff ? ' \u00b7 Order by ' + props.cutoff : null];
+    var action = quiet
+      ? (props.followHref ? h('a', { className: 'ss-bar__link', href: props.followHref }, props.followLabel || 'Follow us for the next batch') : null)
+      : h(Button, { variant: 'sun', href: props.orderHref, onClick: props.onOrder, className: 'ss-bar__btn' }, props.ctaLabel || 'Order');
+    return h('div', { className: cx('ss-bar', quiet && 'ss-bar--quiet', almost && 'ss-bar--almost', props.className), role: 'region', 'aria-label': 'Next batch' },
+      h('p', { className: 'ss-bar__text' }, parts), action);
+  }
+
   /* ---------- BakeDayPanel (TDD §9.1 item 2) ---------- */
   function BakeDayPanel(props) {
     var reasonId = useId(), headId = useId();
@@ -125,7 +153,8 @@
     var quiet = full || closed;
     var almost = !quiet && remaining <= almostAt;
     var reason = full ? 'This batch is sold out.' : closed ? 'Orders for this batch have closed.' : null;
-    var label = props.ctaLabel || (almost ? 'Order now \u00b7 ' + remaining + ' left' : 'Order now');
+    var base = props.ctaLabel || orderLabel(props.bakeDate);
+    var label = almost ? base + ' \u00b7 ' + remaining + ' left' : base;
     return h('section', { className: cx('ss-bakeday', quiet && 'ss-bakeday--quiet', almost && 'ss-bakeday--almost', props.className), 'aria-labelledby': headId },
       h('div', { className: 'ss-bakeday__head' },
         h('p', { className: 'ss-bakeday__eyebrow' }, props.eyebrow || 'Next batch'),
@@ -186,12 +215,14 @@
     var media = props.image
       ? h('img', { className: 'ss-box__img', src: props.image, alt: props.imageAlt || '' })
       : h('div', { className: 'ss-box__ph', 'aria-hidden': 'true' }, h('span', { className: 'ss-box__phnum' }, props.tartCount), h('span', { className: 'ss-box__phlabel' }, 'tarts'));
-    return h('article', { className: cx('ss-box', props.layout === 'row' && 'ss-box--row', selected && 'ss-box--selected', props.disabled && 'ss-box--disabled', props.className) },
+    var linked = props.href && !props.onQuantityChange && !props.disabled;
+    return h('article', { className: cx('ss-box', props.layout === 'row' && 'ss-box--row', selected && 'ss-box--selected', props.disabled && 'ss-box--disabled', linked && 'ss-box--link', props.className) },
       h('div', { className: 'ss-box__media' }, media),
       h('div', { className: 'ss-box__body' },
-        h(HT, { className: 'ss-box__name' }, props.name),
+        h(HT, { className: 'ss-box__name' }, linked ? h('a', { className: 'ss-box__link', href: props.href }, props.name) : props.name),
         h('p', { className: 'ss-box__meta' }, props.subtitle ? props.subtitle + ' \u00B7 ' + props.tartCount + ' egg tarts' : props.tartCount + ' egg tarts'),
         h('p', { className: 'ss-box__price' }, props.price),
+        linked ? h('span', { className: 'ss-box__go', 'aria-hidden': 'true' }, props.linkLabel || 'Choose this box \u2192') : null,
         props.onQuantityChange ? h(QuantityStepper, { value: props.quantity || 0, max: props.max, disabled: props.disabled, onChange: props.onQuantityChange, label: 'Number of ' + props.name, itemName: props.name }) : null));
   }
 
@@ -208,9 +239,9 @@
     }, rest));
     return h('div', { className: cx('ss-field', props.error && 'ss-field--error', props.className) },
       h('label', { className: 'ss-field__label', htmlFor: id }, props.label, props.optional ? h('span', { className: 'ss-field__opt' }, ' (optional)') : null),
-      props.hint ? h('p', { id: hintId, className: 'ss-field__hint' }, props.hint) : null,
       field,
-      props.error ? h('p', { id: errId, className: 'ss-field__error' }, props.error) : null);
+      props.error ? h('p', { id: errId, className: 'ss-field__error' }, props.error) : null,
+      props.hint ? h('p', { id: hintId, className: 'ss-field__hint' }, props.hint) : null);
   }
 
   /* ---------- OrderSummary (TDD §9.2, §3.2) ---------- */
@@ -263,6 +294,11 @@
         h('p', { className: 'ss-count__head' }, 'Payment window closed'),
         h('p', { className: 'ss-count__text' }, 'This order was cancelled because payment didn’t arrive by ' + props.deadline + '. If you already paid, reply to your order email or message us.'));
     }
+    if (props.compact) {
+      return h('div', { className: cx('ss-count', 'ss-count--compact', props.className), role: 'timer', 'aria-live': 'off' },
+        h('p', { className: 'ss-count__head' }, h('span', null, props.amount ? 'Pay ' + props.amount + ' by ' : 'Pay by ', h('strong', null, props.deadline)),
+          left ? h('span', { className: 'ss-count__inline' }, left) : null));
+    }
     return h('div', { className: cx('ss-count', props.className), role: 'timer', 'aria-live': 'off' },
       h('p', { className: 'ss-count__head' }, 'Pay by ', h('strong', null, props.deadline)),
       left ? h('p', { className: 'ss-count__left' }, left) : null,
@@ -291,9 +327,11 @@
     var value = props.value !== undefined ? props.value : inner;
     var current = methods.filter(function (m) { return m.provider === value; })[0] || methods[0];
     function pick(p) { if (props.value === undefined) setInner(p); if (props.onChange) props.onChange(p); }
+    var prov = current ? current.provider : 'payment';
     var tip = props.tip === undefined
-      ? 'Paying from this phone? Take a screenshot of the QR code, then in your ' + (current ? current.provider : 'payment') + ' app choose “Upload QR” or scan from your gallery.'
+      ? 'Paying from this phone? Take a screenshot of the QR code, then in your ' + prov + ' app choose “Upload QR” or scan from your gallery.'
       : props.tip;
+    var deskTip = props.desktopTip === undefined ? 'Open ' + prov + ' on your phone and scan this code.' : props.desktopTip;
     return h('div', { className: cx('ss-picker', props.className) },
       h('div', { className: 'ss-picker__options', role: 'group', 'aria-label': props.label || 'Payment method' },
         methods.map(function (m) {
@@ -303,7 +341,8 @@
         })),
       current ? h(PaymentQRCard, { provider: current.provider, qrSrc: current.qrSrc, accountName: current.accountName,
         accountHint: current.accountHint, amount: props.amount, headingLevel: props.headingLevel, className: 'ss-picker__card' }) : null,
-      tip ? h('p', { className: 'ss-picker__tip' }, tip) : null);
+      tip ? h('p', { className: 'ss-picker__tip ss-picker__tip--touch' }, tip) : null,
+      deskTip ? h('p', { className: 'ss-picker__tip ss-picker__tip--mouse' }, deskTip) : null);
   }
 
   /* ---------- ProofUpload (TDD §9.3, §7.3) ---------- */
@@ -341,6 +380,12 @@
       return h(Notice, { tone: 'danger', title: 'This order was cancelled', className: props.className }, props.reason || null);
     }
     var cur = INDEX[status] == null ? 0 : INDEX[status];
+    if (props.title) {
+      var HT = hTag(props.headingLevel, 3);
+      return h('section', { className: cx('ss-progress-card', props.className) },
+        h(HT, { className: 'ss-progress-card__title' }, props.title),
+        h(OrderProgress, { status: status }));
+    }
     return h('ol', { className: cx('ss-progress', props.className), 'aria-label': 'Order progress' }, STEPS.map(function (s, i) {
       var state = i < cur || (status === 'COMPLETED' && i === cur) ? 'done' : i === cur ? 'current' : 'todo';
       var label = s.label;
@@ -356,15 +401,20 @@
   /* ---------- PickupDetails (TDD §7.4) ---------- */
   function PickupDetails(props) {
     var HT = hTag(props.headingLevel, 3), headId = useId();
+    function title(def) {
+      var t = props.title === undefined ? def : props.title;
+      return t ? h(HT, { id: headId, className: 'ss-pickup__title' }, t) : null;
+    }
+    function labelled(def) { var t = props.title === undefined ? def : props.title; return t ? { 'aria-labelledby': headId } : { 'aria-label': def }; }
     if (!props.revealed) {
-      return h('section', { className: cx('ss-pickup', props.className), 'aria-labelledby': headId },
-        h(HT, { id: headId, className: 'ss-pickup__title' }, 'Pickup area'),
+      return h('section', Object.assign({ className: cx('ss-pickup', props.className) }, labelled('Pickup area')),
+        title('Pickup area'),
         h('p', { className: 'ss-pickup__area' }, props.publicBlurb),
         props.pickupWindow ? h('p', { className: 'ss-pickup__window' }, props.pickupWindow) : null,
         h('p', { className: 'ss-pickup__hint' }, 'Exact address sent when your order is ready.'));
     }
-    return h('section', { className: cx('ss-pickup', 'ss-pickup--revealed', props.className), 'aria-labelledby': headId },
-      h(HT, { id: headId, className: 'ss-pickup__title' }, 'Pickup address'),
+    return h('section', Object.assign({ className: cx('ss-pickup', 'ss-pickup--revealed', props.className) }, labelled('Pickup address')),
+      title('Pickup address'),
       h('p', { className: 'ss-pickup__address' }, props.fullAddress),
       props.pickupWindow ? h('p', { className: 'ss-pickup__window' }, props.pickupWindow) : null,
       props.instructions ? h('p', { className: 'ss-pickup__instr' }, props.instructions) : null,
@@ -375,7 +425,7 @@
 
   var api = {
     Button: Button, StatusBadge: StatusBadge, Notice: Notice, OrderNumber: OrderNumber,
-    BakeDayPanel: BakeDayPanel, CapacityIndicator: CapacityIndicator, HowItWorks: HowItWorks, FaqItem: FaqItem,
+    BakeDayPanel: BakeDayPanel, BakeDayBar: BakeDayBar, CapacityIndicator: CapacityIndicator, HowItWorks: HowItWorks, FaqItem: FaqItem,
     BoxSizeCard: BoxSizeCard, QuantityStepper: QuantityStepper, TextField: TextField, OrderSummary: OrderSummary,
     PaymentCountdown: PaymentCountdown, PaymentQRCard: PaymentQRCard, PaymentMethodPicker: PaymentMethodPicker, ProofUpload: ProofUpload,
     OrderProgress: OrderProgress, PickupDetails: PickupDetails,

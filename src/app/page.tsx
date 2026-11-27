@@ -2,7 +2,7 @@
 // bake day, the menu, how it works, pickup area and FAQ. Two columns from 900px wide.
 import Image from 'next/image';
 import Link from 'next/link';
-import { BakeDayPanel, BoxSizeCard, Button, FaqItem, HowItWorks, PickupDetails, formatPeso } from '@/components/ss';
+import { BakeDayBar, BakeDayPanel, BoxSizeCard, Button, FaqItem, HowItWorks, PickupDetails, formatPeso, orderLabel } from '@/components/ss';
 import { SiteFooter } from '@/components/SiteFooter';
 import { getLandingData } from '@/lib/data';
 import { site } from '@/lib/site';
@@ -12,14 +12,22 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
   const { state } = await searchParams;
   const { bakeDay, products, pickupArea, settings } = await getLandingData(state);
   const taking = bakeDay?.state === 'open' && bakeDay.remainingTarts > 0;
-  const orderHref = state ? `/order?state=${encodeURIComponent(state)}` : '/order';
-  const weekday = bakeDay?.bakeDateLabel.split(',')[0];
+  const orderHref = (add?: string) => {
+    const q = new URLSearchParams();
+    if (state) q.set('state', state);
+    if (add) q.set('add', add);
+    return q.size ? `/order?${q}` : '/order';
+  };
+  // One label for the main order action everywhere on the page: "Order for Saturday".
+  const orderCta = orderLabel(bakeDay?.bakeDateLabel);
   const town = pickupArea.split(',')[0];
+  const panelState = !bakeDay ? 'none' : bakeDay.remainingTarts <= 0 ? 'soldout' : bakeDay.state;
 
+  // While taking orders, each box links to the order form with that box already added.
   const boxes = (layout: 'row' | 'card') =>
     products.map((p) => (
       <BoxSizeCard key={p.id} layout={layout} name={p.name} subtitle={p.subtitle} tartCount={p.tartCount}
-        price={formatPeso(p.priceCentavos)} headingLevel={3} />
+        price={formatPeso(p.priceCentavos)} headingLevel={3} href={taking ? orderHref(p.id) : undefined} />
     ));
 
   return (
@@ -34,36 +42,45 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
           <a href="#how">How it works</a>
           <a href="#questions">Questions</a>
         </nav>
-        {taking ? <Button variant="primary" href={orderHref}>Order now</Button> : null}
+        {taking ? <div className="desk"><Button variant="primary" href={orderHref()}>{orderCta}</Button></div> : null}
       </header>
+      {/* Phones: the bake day in one line, so it's in the first screen above the photo. */}
+      <div className="phone bar">
+        <BakeDayBar state={panelState} bakeDate={bakeDay?.bakeDateShort} cutoff={bakeDay?.cutoffShort}
+          remaining={bakeDay?.remainingTarts} orderHref={taking ? orderHref() : undefined}
+          followHref={taking ? undefined : site.facebookUrl} />
+      </div>
 
       <main className="wrap stack">
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-photo">
             <Image src={hero} alt="Four golden egg tarts in a white box" priority placeholder="blur" fill
               sizes="(min-width: 900px) 840px, 100vw" />
-            <span className="sticker" aria-hidden="true">fresh every Saturday</span>
+            <span className="sticker" aria-hidden="true">baked fresh to order</span>
           </div>
           <div className="hero-copy">
             <h1 id="hero-title" className="h1">Homemade egg tarts, baked in small batches.</h1>
             <p className="lead">
-              Flaky crust, silky custard, baked the morning you pick up. Pre-order by Friday, collect them warm in {town} on Saturday.
+              Flaky crust, silky custard, baked the morning you pick up.{' '}
+              {taking
+                ? `Pre-order by ${bakeDay.cutoffWeekday}, then collect them warm in ${town} on ${bakeDay.bakeDateLabel.split(',')[0]}.`
+                : `Pre-order before the cut-off, then collect them warm in ${town} on bake day.`}
             </p>
             <ul className="chips">
               <li>Pre-order only</li>
               <li>Pickup in {town}</li>
-              <li>GCash or bank transfer</li>
+              <li>GCash or bank</li>
             </ul>
             {bakeDay ? (
               <BakeDayPanel
-                state={bakeDay.remainingTarts <= 0 ? 'soldout' : bakeDay.state}
+                state={panelState}
                 bakeDate={bakeDay.bakeDateLabel}
                 pickupWindow={bakeDay.pickupWindowLabel}
                 cutoff={bakeDay.cutoffLabel}
                 remaining={bakeDay.remainingTarts}
                 capacity={bakeDay.capacityTarts}
                 note={bakeDay.publicNote}
-                orderHref={taking ? orderHref : undefined}
+                orderHref={taking ? orderHref() : undefined}
                 followHref={taking ? undefined : site.facebookUrl}
                 followLabel="Follow us on Facebook"
                 headingLevel={2}
@@ -81,7 +98,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
                 <h2 id="boxes-title" className="h2">The boxes</h2>
                 <p className="text">Every tart is baked the morning of pickup. Mix and match up to {settings.maxTartsPerOrder} tarts per order.</p>
               </div>
-              <div className="desk"><Button variant="primary" size="lg" href={orderHref}>Order for {weekday}</Button></div>
+              <div className="desk"><Button variant="primary" size="lg" href={orderHref()}>{orderCta}</Button></div>
             </div>
           ) : (
             <>
@@ -91,7 +108,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
           )}
           <div className="boxes-rows phone">{boxes('row')}</div>
           <div className="boxes-cards desk">{boxes('card').map((b) => <div key={b.key}>{b}</div>)}</div>
-          {taking ? <div className="phone"><Button variant="primary" size="lg" block href={orderHref}>Order for {weekday}</Button></div> : null}
+          {taking ? <div className="phone"><Button variant="primary" size="lg" block href={orderHref()}>{orderCta}</Button></div> : null}
         </section>
 
         <section className="sec" id="how" aria-labelledby="how-title">
@@ -102,8 +119,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
         <div className="two">
           <section className="sec" aria-labelledby="pickup-title">
             <h2 id="pickup-title" className="h2">Pickup</h2>
-            <PickupDetails publicBlurb={pickupArea}
-              pickupWindow={bakeDay ? `${bakeDay.bakeDateLabel} · ${bakeDay.pickupWindowLabel}` : undefined} headingLevel={3} />
+            {/* The section heading already says "Pickup", so the card has no title of its own. */}
+            <PickupDetails title="" publicBlurb={pickupArea}
+              pickupWindow={bakeDay ? `On bake days · ${bakeDay.pickupWindowLabel}` : undefined} headingLevel={3} />
           </section>
           <section className="sec sec--faq" id="questions" aria-labelledby="faq-title">
             <h2 id="faq-title" className="h2 h2--faq">Questions</h2>

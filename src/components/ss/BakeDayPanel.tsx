@@ -18,6 +18,7 @@ export interface BakeDayPanelProps {
   /** bake_days.public_note, e.g. "Adding ube tarts this week!" */
   note?: string;
   orderHref?: string;
+  /** Default "Order for Saturday" (the day from bakeDate); "· 12 left" is added when almost sold out. */
   ctaLabel?: string;
   eyebrow?: string;
   /** Extra sentence after the closed/sold-out reason. */
@@ -28,6 +29,12 @@ export interface BakeDayPanelProps {
   noneText?: string;
   headingLevel?: HeadingLevel;
   className?: string;
+}
+
+/** The one label for the main order action everywhere: "Order for Saturday". */
+export function orderLabel(bakeDate?: string): string {
+  const day = bakeDate ? String(bakeDate).split(/[ ,]/)[0] : '';
+  return /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/i.test(day) ? `Order for ${day}` : 'Order now';
 }
 
 /**
@@ -61,7 +68,8 @@ export function BakeDayPanel(props: BakeDayPanelProps) {
   const quiet = full || closed;
   const almost = !quiet && remaining <= almostAt;
   const reason = full ? 'This batch is sold out.' : closed ? 'Orders for this batch have closed.' : null;
-  const label = props.ctaLabel || (almost ? `Order now · ${remaining} left` : 'Order now');
+  const base = props.ctaLabel || orderLabel(props.bakeDate);
+  const label = almost ? `${base} · ${remaining} left` : base;
 
   return (
     <section className={cx('ss-bakeday', quiet && 'ss-bakeday--quiet', almost && 'ss-bakeday--almost', props.className)} aria-labelledby={headId}>

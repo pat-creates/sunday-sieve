@@ -6,7 +6,8 @@ export { StatusBadge, STATUS_LABELS, type StatusBadgeProps } from './StatusBadge
 export { Notice, type NoticeProps } from './Notice';
 export { OrderNumber, type OrderNumberProps } from './OrderNumber';
 export { CapacityIndicator, type CapacityIndicatorProps } from './CapacityIndicator';
-export { BakeDayPanel, type BakeDayPanelProps } from './BakeDayPanel';
+export { BakeDayPanel, orderLabel, type BakeDayPanelProps } from './BakeDayPanel';
+export { BakeDayBar, type BakeDayBarProps } from './BakeDayBar';
 export { HowItWorks, type HowItWorksProps } from './HowItWorks';
 export { FaqItem, type FaqItemProps } from './FaqItem';
 export { QuantityStepper, type QuantityStepperProps } from './QuantityStepper';
