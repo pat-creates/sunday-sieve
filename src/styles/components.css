@@ -14,7 +14,7 @@ body { margin: 0; font-family: var(--font-body); font-size: 16px; line-height: 2
 .ss-btn--lg { min-height: 52px; padding: 0 var(--space-4); font-size: 18px; }
 .ss-btn--block { display: flex; width: 100%; }
 .ss-btn--primary { background: var(--leaf-green); color: var(--ink-inverse); }
-.ss-btn--primary:hover:not(:disabled) { box-shadow: var(--elevation-2); }
+.ss-btn--primary:hover:not(:disabled) { background: var(--leaf-green-dark); box-shadow: var(--elevation-2); }
 .ss-btn--sun { background: var(--sun-yellow); color: var(--on-accent); }
 .ss-btn--sun:hover:not(:disabled) { box-shadow: var(--elevation-2); }
 .ss-btn--secondary { background: var(--surface-raised); color: var(--ink-brand); border-color: var(--leaf-green); }
@@ -22,6 +22,14 @@ body { margin: 0; font-family: var(--font-body); font-size: 16px; line-height: 2
 .ss-btn--quiet { background: transparent; color: var(--ink-brand); text-decoration: underline; text-underline-offset: 3px; padding: 0 var(--space-1); }
 .ss-btn--danger { background: var(--surface-raised); color: var(--danger); border-color: var(--danger); }
 .ss-btn--danger:hover:not(:disabled) { background: var(--danger-soft); }
+/* Buttons drawn as links keep their own text colour on hover and after a visit,
+   whatever the page's link styles say. */
+a.ss-btn:not(.ss-btn--quiet), a.ss-btn:not(.ss-btn--quiet):hover, a.ss-btn:not(.ss-btn--quiet):visited { text-decoration: none; }
+a.ss-btn--primary, a.ss-btn--primary:hover, a.ss-btn--primary:visited { color: var(--ink-inverse); }
+a.ss-btn--sun, a.ss-btn--sun:hover, a.ss-btn--sun:visited { color: var(--on-accent); }
+a.ss-btn--secondary, a.ss-btn--secondary:hover, a.ss-btn--secondary:visited,
+a.ss-btn--quiet, a.ss-btn--quiet:hover, a.ss-btn--quiet:visited { color: var(--ink-brand); }
+a.ss-btn--danger, a.ss-btn--danger:hover, a.ss-btn--danger:visited { color: var(--danger); }
 .ss-btn:disabled { background: var(--surface-sunken); color: var(--ink-muted); border-color: var(--line-strong); cursor: not-allowed; box-shadow: none; }
 .ss-btn:focus-visible, .ss-stepper__btn:focus-visible, .ss-ordernum__copy:focus-visible, .ss-faq__q:focus-visible, .ss-field__input:focus-visible {
   outline: 3px solid var(--focus); outline-offset: 2px; }
@@ -288,7 +296,7 @@ textarea.ss-field__input { resize: vertical; }
 /* ---------- BoxSizeCard as a link ---------- */
 .ss-box--link { position: relative; transition: box-shadow .15s ease, border-color .15s ease; }
 .ss-box--link:hover { box-shadow: var(--elevation-2); border-color: var(--leaf-green); }
-.ss-box__link { color: inherit; text-decoration: none; }
+.ss-box__link, .ss-box__link:hover, .ss-box__link:visited { color: inherit; text-decoration: none; }
 .ss-box__link::after { content: ""; position: absolute; inset: 0; }
 .ss-box__link:focus-visible { outline: none; }
 .ss-box--link:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
